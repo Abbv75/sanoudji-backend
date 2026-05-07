@@ -14,4 +14,12 @@ class Author extends Model
         'biography',
         'profilePhotoUrl',
     ];
+
+    /**
+     * Get the books for the author.
+     */
+    public function books()
+    {
+        return $this->hasMany(Book::class, 'id_author');
+    }
 }
