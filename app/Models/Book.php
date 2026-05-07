@@ -36,6 +36,7 @@ class Book extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'book_categories', 'id_book', 'id_category')
+                    ->using(BookCategory::class)
                     ->withTimestamps();
     }
 
