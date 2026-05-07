@@ -14,19 +14,10 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $password = Hash::make('password');
-
         $roles = Role::all()->pluck('id');
 
         foreach ($roles as $role) {
-            User::create([
-                'id' => fake()->uuid(),
-                'firstName' => fake()->firstName(),
-                'lastName' => fake()->lastName(),
-                'email' => fake()->unique()->safeEmail(),
-                'password' => $password,
-                'phone' => fake()->optional()->phoneNumber(),
-                'profilePhotoUrl' => fake()->optional()->imageUrl(),
+            User::factory(50)->create([
                 'id_role' => $role,
             ]);
         }
