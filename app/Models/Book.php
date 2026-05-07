@@ -28,4 +28,13 @@ class Book extends Model
     {
         return $this->belongsTo(Author::class, 'id_author');
     }
+
+    /**
+     * Get the categories for the book.
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'book_categories', 'id_book', 'id_category')
+                    ->withTimestamps();
+    }
 }

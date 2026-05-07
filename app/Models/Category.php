@@ -14,4 +14,13 @@ class Category extends Model
         'description',
         'coverUrl',
     ];
+
+    /**
+     * Get the books for the category.
+     */
+    public function books()
+    {
+        return $this->belongsToMany(Book::class, 'book_categories', 'id_category', 'id_book')
+                    ->withTimestamps();
+    }
 }
