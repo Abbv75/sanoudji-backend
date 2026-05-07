@@ -5,10 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sanoudji API – Documentation</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-material.css" />
   <style>
-    body { margin: 0; padding: 0; }
-    .swagger-ui .topbar { background-color: #1a1a2e; }
-    .swagger-ui .topbar .download-url-wrapper { display: none; }
+    body { 
+      background-color: #1b1b1b; 
+      margin: 0; 
+      padding: 0; 
+    }
+    .swagger-ui {
+      filter: invert(88%) hue-rotate(180deg) brightness(1.05) contrast(1.05);
+    }
+    .swagger-ui .topbar { 
+      display: none; 
+    }
+    /* Restauration des couleurs d'images et certains éléments après inversion */
+    .swagger-ui img, .swagger-ui .opblock-summary-method {
+      filter: invert(100%) hue-rotate(180deg);
+    }
   </style>
 </head>
 <body>
