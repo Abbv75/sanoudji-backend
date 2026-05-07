@@ -37,4 +37,12 @@ class Book extends Model
         return $this->belongsToMany(Category::class, 'book_categories', 'id_book', 'id_category')
                     ->withTimestamps();
     }
+
+    /**
+     * Get the metadata for the book.
+     */
+    public function metadata()
+    {
+        return $this->hasMany(BookMetadata::class, 'id_book');
+    }
 }

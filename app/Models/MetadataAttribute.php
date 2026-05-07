@@ -14,4 +14,12 @@ class MetadataAttribute extends Model
         'description',
         'dataType',
     ];
+
+    /**
+     * Get the metadata values for this attribute.
+     */
+    public function bookMetadata()
+    {
+        return $this->hasMany(BookMetadata::class, 'id_metadata_attribute');
+    }
 }
