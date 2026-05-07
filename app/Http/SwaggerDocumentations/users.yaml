@@ -1,0 +1,157 @@
+paths:
+  /users:
+    get:
+      tags: [Users]
+      summary: Liste de tous les utilisateurs
+      description: Retourne la liste complète des utilisateurs avec leurs rôles.
+      operationId: usersIndex
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Liste récupérée avec succès
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                  - properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+
+    post:
+      tags: [Users]
+      summary: Créer un nouvel utilisateur
+      description: Crée un utilisateur avec photo de profil optionnelle.
+      operationId: usersStore
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [firstName, lastName, email, password, password_confirmation, id_role]
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                password_confirmation:
+                  type: string
+                  format: password
+                phone:
+                  type: string
+                id_role:
+                  type: string
+                profilePhotoUrl:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Utilisateur créé
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '422':
+          description: Erreur de validation
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Détails d'un utilisateur
+      description: Retourne les détails d'un utilisateur, y compris ses commandes et avis.
+      operationId: usersShow
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Détails récupérés
+        '404':
+          description: Utilisateur non trouvé
+
+    put:
+      tags: [Users]
+      summary: Mettre à jour un utilisateur
+      description: Met à jour les informations d'un utilisateur.
+      operationId: usersUpdate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                password_confirmation:
+                  type: string
+                phone:
+                  type: string
+                id_role:
+                  type: string
+                profilePhotoUrl:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Utilisateur mis à jour
+        '404':
+          description: Utilisateur non trouvé
+
+    delete:
+      tags: [Users]
+      summary: Supprimer un utilisateur
+      description: Supprime un utilisateur et sa photo de profil.
+      operationId: usersDestroy
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Utilisateur supprimé
+        '404':
+          description: Utilisateur non trouvé

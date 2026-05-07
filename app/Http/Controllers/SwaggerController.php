@@ -30,7 +30,7 @@ class SwaggerController extends Controller
         $base['paths'] = [];
 
         // Fichiers de domaines à fusionner (ordre d'affichage dans l'UI)
-        $domainFiles = ['auth', 'books', 'categories', 'attributes'];
+        $domainFiles = ['auth', 'users', 'books', 'categories', 'attributes'];
 
         foreach ($domainFiles as $domain) {
             $filePath = "{$docsPath}/{$domain}.yaml";
