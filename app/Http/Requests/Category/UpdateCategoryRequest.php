@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\Category;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginRequest extends FormRequest
+class UpdateCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,9 +22,12 @@ class LoginRequest extends FormRequest
      */
     public function rules(): array
     {
+        $categoryId = $this->route('id');
+
         return [
-            'email' => 'required|email',
-            'password' => 'required|string',
+            'name' => 'sometimes|string|max:255|unique:categories,name,' . $categoryId,
+            'description' => 'nullable|string',
+            'coverUrl' => 'nullable|string',
         ];
     }
 
@@ -33,9 +37,8 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'L\'adresse email est requise.',
-            'email.email' => 'L\'adresse email doit être valide.',
-            'password.required' => 'Le mot de passe est requis.',
+            'name.unique' => 'Ce nom de catégorie existe déjà.',
+            'description.string' => 'La description doit être une chaîne de caractères.',
         ];
     }
 }
