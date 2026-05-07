@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             MetadataAttributeSeeder::class,
             BookSeeder::class,
             BookMetadataSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }
