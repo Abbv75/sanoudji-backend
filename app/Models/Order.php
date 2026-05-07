@@ -39,12 +39,4 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class, 'id_order');
     }
-
-    /**
-     * Get the payments for the order.
-     */
-    public function payments()
-    {
-        return $this->hasMany(Payment::class, 'id_order');
-    }
 }

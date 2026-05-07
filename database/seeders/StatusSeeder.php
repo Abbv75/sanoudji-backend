@@ -20,6 +20,7 @@ class StatusSeeder extends Seeder
             ['id' => 'S04', 'name' => 'en cours', 'description' => 'La commande est en cours de traitement'],
             ['id' => 'S05', 'name' => 'terminé', 'description' => 'La commande est livrée et terminée'],
             ['id' => 'S06', 'name' => 'annulé', 'description' => 'La commande a été annulée'],
+            ['id' => 'S07', 'name' => 'payé', 'description' => 'La commande a été payée avec succès'],
         ];
 
         foreach ($statuses as $status) {

@@ -23,12 +23,4 @@ class Status extends Model
     {
         return $this->hasMany(Order::class, 'id_status');
     }
-
-    /**
-     * Get the payments with this status.
-     */
-    public function payments()
-    {
-        return $this->hasMany(Payment::class, 'id_status');
-    }
 }
