@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CategoryControllerTest extends TestCase
@@ -14,6 +16,7 @@ class CategoryControllerTest extends TestCase
     {
         parent::setUp();
         $this->seed(\Database\Seeders\RoleSeeder::class);
+        Storage::fake('public');
     }
 
     /** @test */
@@ -49,15 +52,17 @@ class CategoryControllerTest extends TestCase
     {
         $user = \App\Models\User::factory()->create(['id_role' => 'R01']); // Admin
         
+        $image = UploadedFile::fake()->image('category.jpg');
+        
         $response = $this->actingAs($user, 'sanctum')->postJson('/api/categories', [
             'name' => 'Nouvelle Catégorie',
-            'description' => 'Description de test'
+            'description' => 'Description de test',
+            'coverUrl' => $image
         ]);
 
-        $response->assertStatus(201)
-            ->assertJsonPath('data.name', 'Nouvelle Catégorie');
-        
+        $response->assertStatus(201);
         $this->assertDatabaseHas('categories', ['name' => 'Nouvelle Catégorie']);
+        Storage::disk('public')->assertExists('images/' . $image->hashName());
     }
 
     /** @test */

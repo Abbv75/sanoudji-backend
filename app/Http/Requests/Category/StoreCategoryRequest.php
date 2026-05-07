@@ -25,7 +25,7 @@ class StoreCategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string',
-            'coverUrl' => 'nullable|string',
+            'coverUrl' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 
@@ -38,6 +38,9 @@ class StoreCategoryRequest extends FormRequest
             'name.required' => 'Le nom de la catégorie est requis.',
             'name.unique' => 'Ce nom de catégorie existe déjà.',
             'description.string' => 'La description doit être une chaîne de caractères.',
+            'coverUrl.image' => 'Le fichier doit être une image.',
+            'coverUrl.mimes' => 'L\'image doit être au format: jpeg, png, jpg, gif ou svg.',
+            'coverUrl.max' => 'L\'image ne doit pas dépasser 2Mo.',
         ];
     }
 }

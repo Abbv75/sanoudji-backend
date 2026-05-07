@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 
+use Illuminate\Support\Facades\Storage;
+
 class CategoryController extends Controller
 {
     /**
@@ -24,7 +26,14 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        $category = Category::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('coverUrl')) {
+            $path = $request->file('coverUrl')->store('images', 'public');
+            $data['coverUrl'] = Storage::url($path);
+        }
+
+        $category = Category::create($data);
         return $this->success($category, 'Catégorie créée avec succès', 201);
     }
 
@@ -56,7 +65,20 @@ class CategoryController extends Controller
             return $this->notFound('Catégorie non trouvée');
         }
 
-        $category->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('coverUrl')) {
+            // Supprimer l'ancienne image si elle existe
+            if ($category->coverUrl) {
+                $oldPath = str_replace('/storage/', '', $category->coverUrl);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('coverUrl')->store('images', 'public');
+            $data['coverUrl'] = Storage::url($path);
+        }
+
+        $category->update($data);
 
         return $this->success($category, 'Catégorie mise à jour avec succès');
     }
@@ -72,8 +94,12 @@ class CategoryController extends Controller
             return $this->notFound('Catégorie non trouvée');
         }
 
-        // Vérifier si la catégorie contient des livres avant de supprimer ? 
-        // Ou laisser la cascade/contrainte faire son travail.
+        // Supprimer l'image associée
+        if ($category->coverUrl) {
+            $oldPath = str_replace('/storage/', '', $category->coverUrl);
+            Storage::disk('public')->delete($oldPath);
+        }
+
         $category->delete();
 
         return $this->success(null, 'Catégorie supprimée avec succès');

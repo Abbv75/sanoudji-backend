@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Book;
+use App\Http\Requests\Book\StoreBookRequest;
+use App\Http\Requests\Book\UpdateBookRequest;
+use Illuminate\Support\Facades\Storage;
 
 class BookController extends Controller
 {
@@ -21,6 +24,27 @@ class BookController extends Controller
     }
 
     /**
+     * Store a newly created book.
+     */
+    public function store(StoreBookRequest $request)
+    {
+        $data = $request->validated();
+
+        if ($request->hasFile('coverUrl')) {
+            $path = $request->file('coverUrl')->store('images', 'public');
+            $data['coverUrl'] = Storage::url($path);
+        }
+
+        $book = Book::create($data);
+
+        if ($request->has('categories')) {
+            $book->categories()->sync($request->categories);
+        }
+
+        return $this->success($book->load(['author', 'categories']), 'Livre créé avec succès', 201);
+    }
+
+    /**
      * Display the specified book.
      */
     public function show(string $id)
@@ -33,5 +57,58 @@ class BookController extends Controller
         }
 
         return $this->success($book, 'Détails du livre récupérés avec succès');
+    }
+
+    /**
+     * Update the specified book.
+     */
+    public function update(UpdateBookRequest $request, string $id)
+    {
+        $book = Book::find($id);
+
+        if (!$book) {
+            return $this->notFound('Livre non trouvé');
+        }
+
+        $data = $request->validated();
+
+        if ($request->hasFile('coverUrl')) {
+            if ($book->coverUrl) {
+                $oldPath = str_replace('/storage/', '', $book->coverUrl);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $path = $request->file('coverUrl')->store('images', 'public');
+            $data['coverUrl'] = Storage::url($path);
+        }
+
+        $book->update($data);
+
+        if ($request->has('categories')) {
+            $book->categories()->sync($request->categories);
+        }
+
+        return $this->success($book->load(['author', 'categories']), 'Livre mis à jour avec succès');
+    }
+
+    /**
+     * Remove the specified book.
+     */
+    public function destroy(string $id)
+    {
+        $book = Book::find($id);
+
+        if (!$book) {
+            return $this->notFound('Livre non trouvé');
+        }
+
+        if ($book->coverUrl) {
+            $oldPath = str_replace('/storage/', '', $book->coverUrl);
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        $book->delete();
+
+        return $this->success(null, 'Livre supprimé avec succès');
     }
 }

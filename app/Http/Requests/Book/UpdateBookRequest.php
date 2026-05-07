@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Category;
+namespace App\Http\Requests\Book;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCategoryRequest extends FormRequest
+class UpdateBookRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,12 +22,17 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        $categoryId = $this->route('id');
-
         return [
-            'name' => 'sometimes|string|max:255|unique:categories,name,' . $categoryId,
+            'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
+            'isbn' => 'nullable|string|max:20',
+            'price' => 'sometimes|numeric|min:0',
+            'stock' => 'sometimes|integer|min:0',
             'coverUrl' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'publicationDate' => 'nullable|date',
+            'id_author' => 'sometimes|exists:authors,id',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id',
         ];
     }
 
@@ -37,11 +42,10 @@ class UpdateCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'Ce nom de catégorie existe déjà.',
-            'description.string' => 'La description doit être une chaîne de caractères.',
+            'price.numeric' => 'Le prix doit être un nombre.',
+            'id_author.exists' => 'L\'auteur sélectionné n\'existe pas.',
+            'categories.array' => 'Les catégories doivent être un tableau.',
             'coverUrl.image' => 'Le fichier doit être une image.',
-            'coverUrl.mimes' => 'L\'image doit être au format: jpeg, png, jpg, gif ou svg.',
-            'coverUrl.max' => 'L\'image ne doit pas dépasser 2Mo.',
         ];
     }
 }
