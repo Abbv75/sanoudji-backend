@@ -24,14 +24,11 @@ class ReviewSeeder extends Seeder
 
         foreach ($books as $book) {
             // Créer entre 0 et 10 avis par livre
-            $reviewCount = rand(0, 10);
+            $reviewCount = rand(0, 300);
 
-            for ($i = 0; $i < $reviewCount; $i++) {
-                Review::create([
-                    'id' => fake()->uuid(),
-                    'rating' => rand(1, 5),
-                    'comment' => fake()->optional(0.8)->paragraph(),
-                    'id_user' => $clients->random()->id,
+            if ($reviewCount > 0) {
+                Review::factory($reviewCount)->create([
+                    'id_user' => fn() => $clients->random()->id,
                     'id_book' => $book->id,
                 ]);
             }
