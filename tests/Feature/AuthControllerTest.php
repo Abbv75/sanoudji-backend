@@ -28,7 +28,7 @@ class AuthControllerTest extends TestCase
             'password_confirmation' => 'password123',
         ];
 
-        $response = $this->postJson('/api/register', $userData);
+        $response = $this->postJson('/api/auth/register', $userData);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
@@ -59,7 +59,7 @@ class AuthControllerTest extends TestCase
             'password_confirmation' => 'password123',
         ];
 
-        $response = $this->postJson('/api/register', $userData);
+        $response = $this->postJson('/api/auth/register', $userData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
@@ -74,7 +74,7 @@ class AuthControllerTest extends TestCase
             'id_role' => 'R02'
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'jane@example.com',
             'password' => 'password123',
         ]);
@@ -96,7 +96,7 @@ class AuthControllerTest extends TestCase
             'id_role' => 'R02'
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'jane@example.com',
             'password' => 'wrong-password',
         ]);
@@ -115,7 +115,7 @@ class AuthControllerTest extends TestCase
         $token = $user->createToken('test-token')->plainTextToken;
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->getJson('/api/me');
+            ->getJson('/api/auth/me');
 
         $response->assertStatus(200)
             ->assertJsonPath('data.email', $user->email);
@@ -128,7 +128,7 @@ class AuthControllerTest extends TestCase
         $token = $user->createToken('test-token')->plainTextToken;
 
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/logout');
+            ->postJson('/api/auth/logout');
 
         $response->assertStatus(200)
             ->assertJson(['success' => true, 'message' => 'Déconnexion réussie']);
