@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
@@ -179,11 +178,7 @@ class CategorySeeder extends Seeder
         foreach ($categories as $name) {
             Category::updateOrCreate(
                 ['name' => $name],
-                [
-                    'id' => fake()->uuid(),
-                    'description' => fake()->optional()->sentence(),
-                    'coverUrl' => fake()->optional()->imageUrl(),
-                ]
+                Category::factory()->make(['name' => $name])->toArray()
             );
         }
     }

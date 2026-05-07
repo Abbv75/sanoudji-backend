@@ -59,7 +59,7 @@ class MetadataAttributeSeeder extends Seeder
         foreach ($attributes as $attr) {
             MetadataAttribute::updateOrCreate(
                 ['name' => $attr['name']],
-                array_merge($attr, ['id' => fake()->uuid()])
+                MetadataAttribute::factory()->make($attr)->toArray()
             );
         }
     }
