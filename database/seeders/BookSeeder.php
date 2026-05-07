@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class BookSeeder extends Seeder
@@ -22,22 +21,13 @@ class BookSeeder extends Seeder
             return;
         }
 
-        for ($i = 0; $i < 50; $i++) {
-            $book = Book::create([
-                'id' => fake()->uuid(),
-                'title' => fake()->sentence(3),
-                'description' => fake()->optional()->paragraph(),
-                'isbn' => fake()->optional()->isbn13(),
-                'price' => fake()->numberBetween(1000, 10000), // En centimes ou unité entière
-                'stock' => fake()->numberBetween(0, 100),
-                'coverUrl' => fake()->optional()->imageUrl(),
-                'publicationDate' => fake()->optional()->date(),
-                'id_author' => $authors->random()->id,
-            ]);
-
-            // Attacher 1 à 3 catégories aléatoires
-            $randomCategories = $categories->random(rand(1, 3))->pluck('id');
-            $book->categories()->sync($randomCategories);
-        }
+        // Création de 400 livres
+        Book::factory(400)->create([
+            'id_author' => fn() => $authors->random()->id,
+        ])->each(function ($book) use ($categories) {
+            // Pour chaque livre, on attache entre 0 et 10 catégories aléatoires
+            $randomCategories = $categories->random(rand(0, 10))->pluck('id');
+            $book->categories()->attach($randomCategories);
+        });
     }
 }
