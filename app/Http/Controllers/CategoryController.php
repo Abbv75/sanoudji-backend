@@ -39,8 +39,8 @@ class CategoryController extends Controller
             return $this->notFound('Catégorie non trouvée');
         }
 
-        // Charger les livres de cette catégorie avec pagination
-        $category->setRelation('books', $category->books()->with('author')->paginate(15));
+        // Charger les livres de cette catégorie
+        $category->setRelation('books', $category->books()->with('author')->get());
 
         return $this->success($category, 'Détails de la catégorie récupérés avec succès');
     }

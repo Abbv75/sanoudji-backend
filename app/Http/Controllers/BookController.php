@@ -15,7 +15,7 @@ class BookController extends Controller
     {
         $books = Book::with(['author', 'categories'])
             ->latest()
-            ->paginate(15);
+            ->get();
 
         return $this->success($books, 'Liste des livres récupérée avec succès');
     }
