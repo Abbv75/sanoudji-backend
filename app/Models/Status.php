@@ -9,6 +9,8 @@ class Status extends Model
 {
     use HasUuids;
 
+    protected $table = 'status';
+
     protected $fillable = [
         'name',
         'description',
@@ -20,5 +22,13 @@ class Status extends Model
     public function orders()
     {
         return $this->hasMany(Order::class, 'id_status');
+    }
+
+    /**
+     * Get the payments with this status.
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'id_status');
     }
 }
