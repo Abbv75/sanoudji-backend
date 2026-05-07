@@ -12,13 +12,6 @@ class AuthorSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 0; $i < 20; $i++) {
-            Author::create([
-                'id' => fake()->uuid(),
-                'name' => fake()->name(),
-                'biography' => fake()->optional()->paragraph(),
-                'profilePhotoUrl' => fake()->optional()->imageUrl(),
-            ]);
-        }
+        Author::factory(20)->create();
     }
 }
