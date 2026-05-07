@@ -1,0 +1,687 @@
+openapi: 3.0.3
+info:
+  title: Sanoudji API
+  description: |
+    API REST de la plateforme Sanoudji – gestion de livres, catégories, auteurs, commandes et utilisateurs.
+  version: 1.0.0
+  contact:
+    name: Sanoudji Team
+
+servers:
+  - url: http://localhost:8000/api
+    description: Serveur de développement
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        errors:
+          type: object
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        profilePhotoUrl:
+          type: string
+          nullable: true
+        id_role:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Author:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bio:
+          type: string
+          nullable: true
+        photoUrl:
+          type: string
+          nullable: true
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        coverUrl:
+          type: string
+          nullable: true
+
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        isbn:
+          type: string
+          nullable: true
+        price:
+          type: number
+          format: float
+        stock:
+          type: integer
+        coverUrl:
+          type: string
+          nullable: true
+        publicationDate:
+          type: string
+          format: date
+          nullable: true
+        id_author:
+          type: string
+          format: uuid
+        author:
+          $ref: '#/components/schemas/Author'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+
+    MetadataAttribute:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        dataType:
+          type: string
+          enum: [text, number, date, boolean]
+
+tags:
+  - name: Auth
+    description: Authentification et gestion du compte
+  - name: Books
+    description: Gestion des livres
+  - name: Categories
+    description: Gestion des catégories
+  - name: Attributes
+    description: Gestion des attributs de métadonnées
+
+paths:
+  # ─────────── AUTH ───────────
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Inscription d'un nouvel utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [firstName, lastName, email, password, password_confirmation]
+              properties:
+                firstName:
+                  type: string
+                  example: John
+                lastName:
+                  type: string
+                  example: Doe
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  minLength: 8
+                  example: password123
+                password_confirmation:
+                  type: string
+                  example: password123
+                phone:
+                  type: string
+                  example: "+33612345678"
+      responses:
+        '201':
+          description: Utilisateur créé
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token:
+                            type: string
+                          user:
+                            $ref: '#/components/schemas/User'
+        '422':
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Connexion d'un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          token:
+                            type: string
+                          user:
+                            $ref: '#/components/schemas/User'
+        '401':
+          description: Identifiants invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Profil de l'utilisateur connecté
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profil récupéré
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Non authentifié
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Déconnexion (révocation du token)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Déconnexion réussie
+        '401':
+          description: Non authentifié
+
+  # ─────────── BOOKS ───────────
+  /books:
+    get:
+      tags: [Books]
+      summary: Liste de tous les livres
+      responses:
+        '200':
+          description: Liste récupérée
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Book'
+    post:
+      tags: [Books]
+      summary: Créer un livre
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, price, stock, id_author]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                isbn:
+                  type: string
+                price:
+                  type: number
+                stock:
+                  type: integer
+                coverUrl:
+                  type: string
+                  format: binary
+                publicationDate:
+                  type: string
+                  format: date
+                id_author:
+                  type: string
+                  format: uuid
+                categories:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '201':
+          description: Livre créé
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Book'
+        '422':
+          description: Erreur de validation
+        '401':
+          description: Non authentifié
+
+  /books/{id}:
+    get:
+      tags: [Books]
+      summary: Détails d'un livre
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Détails récupérés
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Book'
+        '404':
+          description: Livre non trouvé
+
+    put:
+      tags: [Books]
+      summary: Mettre à jour un livre
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                price:
+                  type: number
+                stock:
+                  type: integer
+                coverUrl:
+                  type: string
+                  format: binary
+                categories:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Livre mis à jour
+        '404':
+          description: Livre non trouvé
+        '401':
+          description: Non authentifié
+
+    delete:
+      tags: [Books]
+      summary: Supprimer un livre
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Livre supprimé
+        '404':
+          description: Livre non trouvé
+        '401':
+          description: Non authentifié
+
+  # ─────────── CATEGORIES ───────────
+  /categories:
+    get:
+      tags: [Categories]
+      summary: Liste de toutes les catégories
+      responses:
+        '200':
+          description: Liste récupérée
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Category'
+    post:
+      tags: [Categories]
+      summary: Créer une catégorie
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                coverUrl:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Catégorie créée
+        '422':
+          description: Erreur de validation
+        '401':
+          description: Non authentifié
+
+  /categories/{id}:
+    get:
+      tags: [Categories]
+      summary: Détails d'une catégorie avec ses livres
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Détails récupérés
+        '404':
+          description: Catégorie non trouvée
+
+    put:
+      tags: [Categories]
+      summary: Mettre à jour une catégorie
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                coverUrl:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Catégorie mise à jour
+        '404':
+          description: Catégorie non trouvée
+        '401':
+          description: Non authentifié
+
+    delete:
+      tags: [Categories]
+      summary: Supprimer une catégorie
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Catégorie supprimée
+        '404':
+          description: Catégorie non trouvée
+        '401':
+          description: Non authentifié
+
+  # ─────────── ATTRIBUTES ───────────
+  /attributes:
+    get:
+      tags: [Attributes]
+      summary: Liste de tous les attributs de métadonnées
+      responses:
+        '200':
+          description: Liste récupérée
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MetadataAttribute'
+    post:
+      tags: [Attributes]
+      summary: Créer un attribut
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, dataType]
+              properties:
+                name:
+                  type: string
+                  example: Poids
+                dataType:
+                  type: string
+                  enum: [text, number, date, boolean]
+                  example: number
+      responses:
+        '201':
+          description: Attribut créé
+        '422':
+          description: Erreur de validation
+        '401':
+          description: Non authentifié
+
+  /attributes/{id}:
+    get:
+      tags: [Attributes]
+      summary: Détails d'un attribut
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Détails récupérés
+        '404':
+          description: Attribut non trouvé
+
+    put:
+      tags: [Attributes]
+      summary: Mettre à jour un attribut
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                dataType:
+                  type: string
+                  enum: [text, number, date, boolean]
+      responses:
+        '200':
+          description: Attribut mis à jour
+        '404':
+          description: Attribut non trouvé
+        '401':
+          description: Non authentifié
+
+    delete:
+      tags: [Attributes]
+      summary: Supprimer un attribut
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attribut supprimé
+        '404':
+          description: Attribut non trouvé
+        '401':
+          description: Non authentifié
