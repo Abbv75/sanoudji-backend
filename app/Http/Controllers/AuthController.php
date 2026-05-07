@@ -54,6 +54,14 @@ class AuthController extends Controller
     }
 
     /**
+     * Get the authenticated user.
+     */
+    public function me(Request $request)
+    {
+        return $this->success($request->user()->load('role'));
+    }
+
+    /**
      * Log out the user (revoke tokens).
      */
     public function logout(Request $request)
