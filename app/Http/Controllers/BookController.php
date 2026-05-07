@@ -41,7 +41,13 @@ class BookController extends Controller
             $book->categories()->sync($request->categories);
         }
 
-        return $this->success($book->load(['author', 'categories']), 'Livre créé avec succès', 201);
+        if ($request->has('metadata')) {
+            foreach ($request->metadata as $meta) {
+                $book->metadata()->create($meta);
+            }
+        }
+
+        return $this->success($book->load(['author', 'categories', 'metadata.attribute']), 'Livre créé avec succès', 201);
     }
 
     /**
@@ -88,7 +94,14 @@ class BookController extends Controller
             $book->categories()->sync($request->categories);
         }
 
-        return $this->success($book->load(['author', 'categories']), 'Livre mis à jour avec succès');
+        if ($request->has('metadata')) {
+            $book->metadata()->delete();
+            foreach ($request->metadata as $meta) {
+                $book->metadata()->create($meta);
+            }
+        }
+
+        return $this->success($book->load(['author', 'categories', 'metadata.attribute']), 'Livre mis à jour avec succès');
     }
 
     /**

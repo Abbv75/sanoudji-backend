@@ -70,6 +70,17 @@ paths:
                     type: string
                     format: uuid
                   description: Tableau d'IDs de catégories
+                "metadata":
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id_metadata_attribute:
+                        type: string
+                        format: uuid
+                      value:
+                        type: string
+                  description: "Métadonnées personnalisées (ex: [{'id_attribute': '...', 'value': '...'}])"
       responses:
         '201':
           description: Livre créé avec succès
@@ -169,6 +180,16 @@ paths:
                   type: array
                   items:
                     type: string
+                "metadata":
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id_metadata_attribute:
+                        type: string
+                        format: uuid
+                      value:
+                        type: string
       responses:
         '200':
           description: Livre mis à jour

@@ -14,4 +14,12 @@ class BookMetadata extends Model
         'id_metadata_attribute',
         'id_book',
     ];
+
+    /**
+     * Get the attribute that this metadata value belongs to.
+     */
+    public function attribute()
+    {
+        return $this->belongsTo(MetadataAttribute::class, 'id_metadata_attribute');
+    }
 }

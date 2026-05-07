@@ -33,6 +33,9 @@ class UpdateBookRequest extends FormRequest
             'id_author' => 'sometimes|exists:authors,id',
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id',
+            'metadata' => 'nullable|array',
+            'metadata.*.id_metadata_attribute' => 'required|exists:metadata_attributes,id',
+            'metadata.*.value' => 'required|string',
         ];
     }
 
