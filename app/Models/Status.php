@@ -13,4 +13,12 @@ class Status extends Model
         'name',
         'description',
     ];
+
+    /**
+     * Get the orders with this status.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'id_status');
+    }
 }
