@@ -31,4 +31,12 @@ class Order extends Model
     {
         return $this->belongsTo(User::class, 'id_user');
     }
+
+    /**
+     * Get the items in this order.
+     */
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class, 'id_order');
+    }
 }

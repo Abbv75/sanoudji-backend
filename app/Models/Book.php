@@ -45,4 +45,12 @@ class Book extends Model
     {
         return $this->hasMany(BookMetadata::class, 'id_book');
     }
+
+    /**
+     * Get the order items that contain this book.
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class, 'id_book');
+    }
 }
