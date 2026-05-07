@@ -1,0 +1,191 @@
+paths:
+  /attributes:
+    get:
+      tags: [Attributes]
+      summary: Liste de tous les attributs de métadonnées
+      description: |
+        Retourne la liste des attributs disponibles pour le système EAV (Entity-Attribute-Value).
+        Ces attributs définissent les champs personnalisés associables aux livres.
+      operationId: attributesIndex
+      responses:
+        '200':
+          description: Liste récupérée
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/MetadataAttribute'
+
+    post:
+      tags: [Attributes]
+      summary: Créer un attribut de métadonnée
+      description: |
+        Crée un nouvel attribut utilisable pour enrichir les livres.
+        
+        **Types disponibles** :
+        - `text` : Chaîne de caractères
+        - `number` : Valeur numérique
+        - `date` : Date (format YYYY-MM-DD)
+        - `boolean` : Vrai / Faux
+      operationId: attributesStore
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, dataType]
+              properties:
+                name:
+                  type: string
+                  example: Poids
+                description:
+                  type: string
+                  nullable: true
+                  example: Poids du livre en grammes
+                dataType:
+                  type: string
+                  enum: [text, number, date, boolean]
+                  example: number
+      responses:
+        '201':
+          description: Attribut créé
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/MetadataAttribute'
+        '422':
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                message: "Erreur de validation."
+                errors:
+                  dataType: ["Le type doit être : text, number, date ou boolean."]
+        '401':
+          description: Non authentifié
+
+  /attributes/{id}:
+    get:
+      tags: [Attributes]
+      summary: Détails d'un attribut
+      description: Retourne les informations d'un attribut de métadonnée spécifique.
+      operationId: attributesShow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: UUID de l'attribut
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attribut trouvé
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/MetadataAttribute'
+        '404':
+          description: Attribut non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags: [Attributes]
+      summary: Mettre à jour un attribut
+      description: Met à jour le nom ou le type d'un attribut existant.
+      operationId: attributesUpdate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Format
+                description:
+                  type: string
+                  nullable: true
+                dataType:
+                  type: string
+                  enum: [text, number, date, boolean]
+      responses:
+        '200':
+          description: Attribut mis à jour
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/MetadataAttribute'
+        '404':
+          description: Attribut non trouvé
+        '422':
+          description: Erreur de validation
+        '401':
+          description: Non authentifié
+
+    delete:
+      tags: [Attributes]
+      summary: Supprimer un attribut
+      description: |
+        Supprime définitivement un attribut.
+        Attention : cela supprime également toutes les valeurs de métadonnées associées aux livres.
+      operationId: attributesDestroy
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attribut supprimé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Attribut non trouvé
+        '401':
+          description: Non authentifié

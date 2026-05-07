@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\File;
+use Symfony\Component\Yaml\Yaml;
 
 class SwaggerController extends Controller
 {
@@ -17,19 +18,32 @@ class SwaggerController extends Controller
     }
 
     /**
-     * Serve the OpenAPI YAML specification as JSON.
+     * Merge and serve the OpenAPI specification.
+     * Combines openapi.yaml (base) with individual domain files.
      */
     public function spec()
     {
-        $yamlPath = app_path('Http/SwaggerDocumentations/openapi.yaml');
+        $docsPath = app_path('Http/SwaggerDocumentations');
 
-        if (!File::exists($yamlPath)) {
-            return response()->json(['error' => 'Spec not found'], 404);
+        // Chargement du fichier de base (info, servers, components, tags)
+        $base = Yaml::parseFile("{$docsPath}/openapi.yaml");
+        $base['paths'] = [];
+
+        // Fichiers de domaines à fusionner (ordre d'affichage dans l'UI)
+        $domainFiles = ['auth', 'books', 'categories', 'attributes'];
+
+        foreach ($domainFiles as $domain) {
+            $filePath = "{$docsPath}/{$domain}.yaml";
+
+            if (File::exists($filePath)) {
+                $parsed = Yaml::parseFile($filePath);
+                if (!empty($parsed['paths'])) {
+                    $base['paths'] = array_merge($base['paths'], $parsed['paths']);
+                }
+            }
         }
 
-        // Parse YAML to JSON pour Swagger UI
-        $yaml = File::get($yamlPath);
-
-        return response($yaml, 200)->header('Content-Type', 'text/yaml');
+        // Retourner en JSON pour une compatibilité totale avec Swagger UI
+        return response()->json($base);
     }
 }
