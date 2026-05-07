@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone')->nullable();
             $table->string('profilePhotoUrl')->nullable();
-            $table->foreignUuid('id_role')->constrained('roles');
+            $table->string('id_role');
+            $table->foreign('id_role')->references('id')->on('roles');
             $table->rememberToken();
             $table->timestamps();
         });
