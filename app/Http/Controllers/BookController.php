@@ -14,11 +14,17 @@ class BookController extends Controller
     /**
      * Display a listing of books.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::with(['author', 'categories'])
-            ->latest()
-            ->get();
+        $query = Book::with(['author', 'categories'])->latest();
+
+        if ($request->has(['start', 'end'])) {
+            $start = $request->integer('start', 0);
+            $end = $request->integer('end', 10);
+            $query->offset($start)->limit($end - $start);
+        }
+
+        $books = $query->get();
 
         return $this->success($books, 'Liste des livres récupérée avec succès');
     }
